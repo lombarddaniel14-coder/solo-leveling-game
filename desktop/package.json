@@ -1,0 +1,44 @@
+{
+  "name": "solo-leveling-the-system",
+  "version": "1.0.0",
+  "description": "THE SYSTEM - Solo Leveling life tracker (desktop)",
+  "main": "main.js",
+  "author": "Daniel Lombard",
+  "license": "UNLICENSED",
+  "scripts": {
+    "start": "electron .",
+    "icon": "node scripts/make-icon.js",
+    "test-repair": "node scripts/test-repair.js",
+    "dist": "electron-builder --win"
+  },
+  "build": {
+    "appId": "com.daniel.sololeveling",
+    "productName": "Solo Leveling - THE SYSTEM",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "repair.js",
+      "app/**/*"
+    ],
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ],
+      "icon": "build/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
+  },
+  "devDependencies": {
+    "electron": "^43.2.0",
+    "electron-builder": "^26.15.3",
+    "jimp": "^1.6.1",
+    "png-to-ico": "^3.0.2"
+  }
+}

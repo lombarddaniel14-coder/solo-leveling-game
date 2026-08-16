@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Finance Tracker — Daniel's Business Dashboard</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --panel: #171a23;
+    --panel-2: #1e222e;
+    --border: #2a2f3d;
+    --text: #e6e9f0;
+    --muted: #8b93a7;
+    --green: #34d399;
+    --red: #f87171;
+    --blue: #60a5fa;
+    --amber: #fbbf24;
+    --accent: #6366f1;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, "Segoe UI", system-ui, Roboto, Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    padding: 24px;
+    max-width: 1280px;
+    margin: 0 auto;
+  }
+  header {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 12px;
+    margin-bottom: 20px;
+  }
+  header h1 { font-size: 22px; font-weight: 700; letter-spacing: 0.2px; }
+  header .sub { color: var(--muted); font-size: 12px; }
+  .spacer { flex: 1; }
+  .btn {
+    background: var(--panel-2);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 7px 14px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+    font-family: inherit;
+  }
+  .btn:hover { background: #262b3a; border-color: #3a4155; }
+  .btn.primary { background: var(--accent); border-color: var(--accent); font-weight: 600; }
+  .btn.primary:hover { background: #4f52d9; }
+  .btn.danger:hover { border-color: var(--red); color: var(--red); }
+  .btn.small { padding: 3px 9px; font-size: 12px; }
+
+  #lastSaved { color: var(--muted); font-size: 12px; white-space: nowrap; }
+  #lastSaved b { color: var(--green); font-weight: 600; }
+
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 20px; }
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 18px;
+  }
+  .card .label { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px; }
+  .card .value { font-size: 26px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .card .value.income { color: var(--green); }
+  .card .value.expense { color: var(--red); }
+  .card .value.net-pos { color: var(--green); }
+  .card .value.net-neg { color: var(--red); }
+  .card .hint { color: var(--muted); font-size: 11px; margin-top: 4px; }
+
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px;
+    margin-bottom: 20px;
+  }
+  .panel h2 { font-size: 14px; text-transform: uppercase; letter-spacing: 0.8px; color: var(--muted); margin-bottom: 14px; font-weight: 600; }
+
+  /* Per-project bar chart */
+  .chart-row { display: grid; grid-template-columns: 190px 1fr 170px; gap: 10px; align-items: center; padding: 6px 0; }
+  .chart-row .pname { font-size: 13px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .chart-bars { display: flex; flex-direction: column; gap: 3px; }
+  .bar-track { background: var(--panel-2); border-radius: 4px; height: 10px; overflow: hidden; }
+  .bar { height: 100%; border-radius: 4px; min-width: 0; transition: width 0.3s; }
+  .bar.inc { background: var(--green); }
+  .bar.exp { background: var(--red); }
+  .chart-nums { font-size: 12px; color: var(--muted); text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .chart-nums .pos { color: var(--green); }
+  .chart-nums .neg { color: var(--red); }
+
+  /* Filters + add form */
+  .toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 12px; }
+  select, input[type="text"], input[type="date"], input[type="number"] {
+    background: var(--panel-2);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 7px 10px;
+    font-size: 13px;
+    font-family: inherit;
+    outline: none;
+  }
+  select:focus, input:focus { border-color: var(--accent); }
+  input[type="date"] { color-scheme: dark; }
+  .add-form {
+    display: grid;
+    grid-template-columns: 140px 1.2fr 110px 1fr 1.6fr 110px auto auto;
+    gap: 8px;
+    align-items: center;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px;
+    margin-bottom: 16px;
+  }
+  .add-form input, .add-form select { width: 100%; background: var(--bg); }
+  .chk { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--muted); white-space: nowrap; }
+  .chk input { accent-color: var(--accent); width: 15px; height: 15px; cursor: pointer; }
+
+  /* Table */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+  th {
+    text-align: left; padding: 9px 10px; font-size: 11px; text-transform: uppercase;
+    letter-spacing: 0.7px; color: var(--muted); border-bottom: 2px solid var(--border);
+    cursor: pointer; user-select: none; white-space: nowrap;
+  }
+  th:hover { color: var(--text); }
+  th .arrow { font-size: 10px; }
+  td { padding: 8px 10px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  tbody tr:hover { background: rgba(255,255,255,0.025); }
+  td.amt { text-align: right; font-weight: 600; white-space: nowrap; }
+  th.amt { text-align: right; }
+  td.amt.income { color: var(--green); }
+  td.amt.expense { color: var(--red); }
+  .tag {
+    display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 20px; font-weight: 600;
+  }
+  .tag.income { background: rgba(52,211,153,0.12); color: var(--green); }
+  .tag.expense { background: rgba(248,113,113,0.12); color: var(--red); }
+  .tag.recur { background: rgba(96,165,250,0.12); color: var(--blue); margin-left: 6px; }
+  .note-txt { color: var(--amber); font-size: 12px; display: block; }
+  .desc-txt { display: block; }
+  td .row-actions { display: flex; gap: 6px; justify-content: flex-end; }
+  tr.editing td { background: rgba(99,102,241,0.07); }
+  tr.editing input, tr.editing select { width: 100%; min-width: 60px; background: var(--bg); padding: 5px 8px; }
+  .empty { text-align: center; color: var(--muted); padding: 30px 0; }
+  tfoot td { font-weight: 700; border-bottom: none; border-top: 2px solid var(--border); }
+  .footer-note { color: var(--muted); font-size: 11px; margin-top: 16px; text-align: center; }
+  #importFile { display: none; }
+  @media (max-width: 900px) {
+    .add-form { grid-template-columns: 1fr 1fr; }
+    .chart-row { grid-template-columns: 120px 1fr 130px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>💼 Finance Tracker</h1>
+    <div class="sub">All business endeavors — income, expenses, net</div>
+  </div>
+  <div class="spacer"></div>
+  <span id="lastSaved">Not saved yet</span>
+  <button class="btn" id="btnExportJson" title="Download all data as JSON backup">Export JSON</button>
+  <button class="btn" id="btnImportJson" title="Restore from a JSON backup">Import JSON</button>
+  <button class="btn" id="btnExportCsv" title="Download transactions as a spreadsheet CSV">Export CSV</button>
+  <input type="file" id="importFile" accept=".json,application/json">
+</header>
+
+<div class="cards">
+  <div class="card">
+    <div class="label">Total Income</div>
+    <div class="value income" id="cardIncome">$0.00</div>
+    <div class="hint" id="cardIncomeHint"></div>
+  </div>
+  <div class="card">
+    <div class="label">Total Expenses</div>
+    <div class="value expense" id="cardExpense">$0.00</div>
+    <div class="hint" id="cardExpenseHint"></div>
+  </div>
+  <div class="card">
+    <div class="label">Net</div>
+    <div class="value" id="cardNet">$0.00</div>
+    <div class="hint" id="cardNetHint"></div>
+  </div>
+  <div class="card">
+    <div class="label">Recurring / Month</div>
+    <div class="value expense" id="cardRecurring">$0.00</div>
+    <div class="hint">flagged recurring monthly expenses</div>
+  </div>
+</div>
+
+<div class="panel">
+  <h2>Per-Project Breakdown</h2>
+  <div id="projectChart"></div>
+</div>
+
+<div class="panel">
+  <h2>Transactions</h2>
+
+  <div class="toolbar">
+    <select id="filterProject" title="Filter by project"></select>
+    <select id="filterCategory" title="Filter by category">
+      <option value="">All categories</option>
+      <option value="Income">Income</option>
+      <option value="Expense">Expense</option>
+    </select>
+    <input type="text" id="filterSearch" placeholder="Search description / subcategory…" style="flex:1; min-width:180px;">
+    <button class="btn small" id="btnClearFilters">Clear</button>
+  </div>
+
+  <div class="add-form">
+    <input type="date" id="addDate" title="Date">
+    <select id="addProject" title="Project"></select>
+    <select id="addCategory" title="Category">
+      <option value="Income">Income</option>
+      <option value="Expense" selected>Expense</option>
+    </select>
+    <input type="text" id="addSubcategory" placeholder="Subcategory (e.g. Software)">
+    <input type="text" id="addDescription" placeholder="Description">
+    <input type="number" id="addAmount" placeholder="0.00" step="0.01" min="0">
+    <label class="chk"><input type="checkbox" id="addRecurring"> Recurring monthly</label>
+    <button class="btn primary" id="btnAdd">+ Add</button>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th data-sort="date">Date <span class="arrow"></span></th>
+          <th data-sort="project">Project <span class="arrow"></span></th>
+          <th data-sort="category">Category <span class="arrow"></span></th>
+          <th data-sort="subcategory">Subcategory <span class="arrow"></span></th>
+          <th data-sort="description">Description <span class="arrow"></span></th>
+          <th data-sort="amount" class="amt">Amount <span class="arrow"></span></th>
+          <th style="cursor:default"></th>
+        </tr>
+      </thead>
+      <tbody id="txBody"></tbody>
+      <tfoot>
+        <tr>
+          <td colspan="5" style="text-align:right; color:var(--muted);">Filtered net:</td>
+          <td class="amt" id="footNet">$0.00</td>
+          <td></td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+</div>
+
+<div class="footer-note">
+  Data auto-saves to this browser (localStorage) on every change. Use <b>Export JSON</b> regularly for a backup copy.
+</div>
+
+<script>
+"use strict";
+
+// ---------- Seed data (default state on first load) ----------
+var SEED = {
+  projects: [
+    "500 Dollar Project",
+    "AI AUTO (AutoDx) — shelved",
+    "Solo Leveling Dashboard",
+    "Agent HQ",
+    "Content Creation",
+    "General"
+  ],
+  transactions: [
+    {
+      id: 1,
+      date: "2026-07-07",
+      project: "General",
+      category: "Expense",
+      subcategory: "Software",
+      description: "Claude Max subscription (monthly, recurring)",
+      amount: 200.00,
+      recurring: true,
+      note: "Max 20x tier confirmed 2026-07-07"
+    },
+    {
+      id: 2,
+      date: "2026-07-07",
+      project: "Content Creation",
+      category: "Expense",
+      subcategory: "Equipment",
+      description: "Saramonic microphone",
+      amount: 55.00,
+      recurring: false,
+      note: ""
+    },
+    {
+      id: 3,
+      date: "2026-07-07",
+      project: "500 Dollar Project",
+      category: "Income",
+      subcategory: "Web Design",
+      description: "No revenue yet — batch 1 outreach sent 2026-07-07",
+      amount: 0.00,
+      recurring: false,
+      note: ""
+    }
+  ],
+  lastSaved: null
+};
+
+var STORAGE_KEY = "finance-tracker-data";
+
+// ---------- State ----------
+var state;
+var sortKey = "date";
+var sortDir = -1; // -1 = desc (newest first), 1 = asc
+var editingId = null;
+
+function loadState() {
+  try {
+    var raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      var parsed = JSON.parse(raw);
+      if (parsed && Array.isArray(parsed.transactions) && Array.isArray(parsed.projects)) {
+        return parsed;
+      }
+    }
+  } catch (e) {
+    console.warn("Could not load saved data, starting from seed.", e);
+  }
+  return JSON.parse(JSON.stringify(SEED));
+}
+
+function saveState() {
+  state.lastSaved = new Date().toISOString();
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch (e) {
+    alert("Warning: could not save to browser storage (" + e.message + "). Export JSON to keep your data safe.");
+  }
+  updateLastSavedLabel();
+}
+
+function updateLastSavedLabel() {
+  var el = document.getElementById("lastSaved");
+  if (state.lastSaved) {
+    var d = new Date(state.lastSaved);
+    el.innerHTML = "Last saved: <b>" + d.toLocaleString() + "</b>";
+  } else {
+    el.textContent = "Loaded seed data — not yet modified";
+  }
+}
+
+// ---------- Helpers ----------
+function esc(s) {
+  return String(s == null ? "" : s)
+    .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+}
+function money(n) {
+  var v = Number(n) || 0;
+  var sign = v < 0 ? "-" : "";
+  return sign + "$" + Math.abs(v).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+function nextId() {
+  var max = 0;
+  for (var i = 0; i < state.transactions.length; i++) {
+    if (state.transactions[i].id > max) max = state.transactions[i].id;
+  }
+  return max + 1;
+}
+function todayStr() {
+  var d = new Date();
+  return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+}
+function findTx(id) {
+  for (var i = 0; i < state.transactions.length; i++) {
+    if (state.transactions[i].id === id) return state.transactions[i];
+  }
+  return null;
+}
+
+// ---------- Filtering / sorting ----------
+function getFilteredTx() {
+  var proj = document.getElementById("filterProject").value;
+  var cat = document.getElementById("filterCategory").value;
+  var q = document.getElementById("filterSearch").value.trim().toLowerCase();
+  var list = state.transactions.filter(function (t) {
+    if (proj && t.project !== proj) return false;
+    if (cat && t.category !== cat) return false;
+    if (q) {
+      var hay = (t.description + " " + t.subcategory + " " + (t.note || "") + " " + t.project).toLowerCase();
+      if (hay.indexOf(q) === -1) return false;
+    }
+    return true;
+  });
+  list.sort(function (a, b) {
+    var av = a[sortKey], bv = b[sortKey];
+    var cmp;
+    if (sortKey === "amount") {
+      cmp = (Number(av) || 0) - (Number(bv) || 0);
+    } else {
+      cmp = String(av || "").localeCompare(String(bv || ""));
+    }
+    if (cmp === 0) cmp = a.id - b.id;
+    return cmp * sortDir;
+  });
+  return list;
+}
+
+// ---------- Rendering ----------
+function renderProjectSelects() {
+  var opts = "";
+  for (var i = 0; i < state.projects.length; i++) {
+    opts += '<option value="' + esc(state.projects[i]) + '">' + esc(state.projects[i]) + "</option>";
+  }
+  var fp = document.getElementById("filterProject");
+  var prevFilter = fp.value;
+  fp.innerHTML = '<option value="">All projects</option>' + opts;
+  if (prevFilter && state.projects.indexOf(prevFilter) !== -1) fp.value = prevFilter;
+
+  var ap = document.getElementById("addProject");
+  var prevAdd = ap.value;
+  ap.innerHTML = opts + '<option value="__new__">➕ New project…</option>';
+  if (prevAdd && state.projects.indexOf(prevAdd) !== -1) ap.value = prevAdd;
+}
+
+function renderCards() {
+  var income = 0, expense = 0, recurring = 0, incCount = 0, expCount = 0;
+  state.transactions.forEach(function (t) {
+    var amt = Number(t.amount) || 0;
+    if (t.category === "Income") { income += amt; incCount++; }
+    else { expense += amt; expCount++; }
+    if (t.recurring && t.category === "Expense") recurring += amt;
+  });
+  var net = income - expense;
+  document.getElementById("cardIncome").textContent = money(income);
+  document.getElementById("cardExpense").textContent = money(expense);
+  var netEl = document.getElementById("cardNet");
+  netEl.textContent = money(net);
+  netEl.className = "value " + (net >= 0 ? "net-pos" : "net-neg");
+  document.getElementById("cardRecurring").textContent = money(recurring);
+  document.getElementById("cardIncomeHint").textContent = incCount + " income entr" + (incCount === 1 ? "y" : "ies");
+  document.getElementById("cardExpenseHint").textContent = expCount + " expense entr" + (expCount === 1 ? "y" : "ies");
+  document.getElementById("cardNetHint").textContent = "income minus expenses, all projects";
+}
+
+function renderChart() {
+  var totals = {};
+  state.projects.forEach(function (p) { totals[p] = { inc: 0, exp: 0 }; });
+  state.transactions.forEach(function (t) {
+    if (!totals[t.project]) totals[t.project] = { inc: 0, exp: 0 };
+    var amt = Number(t.amount) || 0;
+    if (t.category === "Income") totals[t.project].inc += amt;
+    else totals[t.project].exp += amt;
+  });
+  var names = Object.keys(totals);
+  var max = 0;
+  names.forEach(function (p) {
+    if (totals[p].inc > max) max = totals[p].inc;
+    if (totals[p].exp > max) max = totals[p].exp;
+  });
+  if (max <= 0) max = 1;
+  var html = "";
+  names.forEach(function (p) {
+    var t = totals[p];
+    var net = t.inc - t.exp;
+    var wInc = Math.round((t.inc / max) * 100);
+    var wExp = Math.round((t.exp / max) * 100);
+    if (t.inc > 0 && wInc < 2) wInc = 2;
+    if (t.exp > 0 && wExp < 2) wExp = 2;
+    html +=
+      '<div class="chart-row">' +
+        '<div class="pname" title="' + esc(p) + '">' + esc(p) + "</div>" +
+        '<div class="chart-bars">' +
+          '<div class="bar-track"><div class="bar inc" style="width:' + wInc + '%"></div></div>' +
+          '<div class="bar-track"><div class="bar exp" style="width:' + wExp + '%"></div></div>' +
+        "</div>" +
+        '<div class="chart-nums">' +
+          '<span class="pos">+' + money(t.inc) + "</span> / " +
+          '<span class="neg">-' + money(t.exp) + "</span><br>" +
+          "net <span class=\"" + (net >= 0 ? "pos" : "neg") + "\">" + money(net) + "</span>" +
+        "</div>" +
+      "</div>";
+  });
+  document.getElementById("projectChart").innerHTML = html || '<div class="empty">No projects yet.</div>';
+}
+
+function projectOptionsHtml(selected) {
+  var html = "";
+  for (var i = 0; i < state.projects.length; i++) {
+    var p = state.projects[i];
+    html += '<option value="' + esc(p) + '"' + (p === selected ? " selected" : "") + ">" + esc(p) + "</option>";
+  }
+  return html;
+}
+
+function renderTable() {
+  var list = getFilteredTx();
+  var body = document.getElementById("txBody");
+  var html = "";
+  var footNet = 0;
+
+  list.forEach(function (t) {
+    var amt = Number(t.amount) || 0;
+    footNet += (t.category === "Income" ? amt : -amt);
+
+    if (t.id === editingId) {
+      html +=
+        '<tr class="editing" data-id="' + t.id + '">' +
+          '<td><input type="date" class="e-date" value="' + esc(t.date) + '"></td>' +
+          '<td><select class="e-project">' + projectOptionsHtml(t.project) + "</select></td>" +
+          '<td><select class="e-category">' +
+            '<option value="Income"' + (t.category === "Income" ? " selected" : "") + ">Income</option>" +
+            '<option value="Expense"' + (t.category === "Expense" ? " selected" : "") + ">Expense</option>" +
+          "</select></td>" +
+          '<td><input type="text" class="e-subcategory" value="' + esc(t.subcategory) + '"></td>' +
+          '<td><input type="text" class="e-description" value="' + esc(t.description) + '" style="margin-bottom:4px;">' +
+            '<input type="text" class="e-note" value="' + esc(t.note || "") + '" placeholder="Note (optional)">' +
+            '<label class="chk" style="margin-top:4px;"><input type="checkbox" class="e-recurring"' + (t.recurring ? " checked" : "") + "> Recurring monthly</label></td>" +
+          '<td class="amt"><input type="number" class="e-amount" step="0.01" min="0" value="' + amt.toFixed(2) + '"></td>' +
+          '<td><div class="row-actions">' +
+            '<button class="btn small primary" data-action="save" data-id="' + t.id + '">Save</button>' +
+            '<button class="btn small" data-action="cancel" data-id="' + t.id + '">Cancel</button>' +
+          "</div></td>" +
+        "</tr>";
+    } else {
+      html +=
+        '<tr data-id="' + t.id + '">' +
+          "<td>" + esc(t.date) + "</td>" +
+          "<td>" + esc(t.project) + "</td>" +
+          '<td><span class="tag ' + (t.category === "Income" ? "income" : "expense") + '">' + esc(t.category) + "</span>" +
+            (t.recurring ? '<span class="tag recur" title="Recurring monthly">↻ monthly</span>' : "") + "</td>" +
+          "<td>" + esc(t.subcategory) + "</td>" +
+          '<td><span class="desc-txt">' + esc(t.description) + "</span>" +
+            (t.note ? '<span class="note-txt">📝 ' + esc(t.note) + "</span>" : "") + "</td>" +
+          '<td class="amt ' + (t.category === "Income" ? "income" : "expense") + '">' +
+            (t.category === "Income" ? "+" : "-") + money(amt) + "</td>" +
+          '<td><div class="row-actions">' +
+            '<button class="btn small" data-action="edit" data-id="' + t.id + '">Edit</button>' +
+            '<button class="btn small danger" data-action="delete" data-id="' + t.id + '">Del</button>' +
+          "</div></td>" +
+        "</tr>";
+    }
+  });
+
+  if (!html) {
+    html = '<tr><td colspan="7" class="empty">No transactions match the current filters.</td></tr>';
+  }
+  body.innerHTML = html;
+
+  var footEl = document.getElementById("footNet");
+  footEl.textContent = money(footNet);
+  footEl.style.color = footNet >= 0 ? "var(--green)" : "var(--red)";
+
+  // Sort arrows
+  var ths = document.querySelectorAll("th[data-sort]");
+  ths.forEach(function (th) {
+    var arrow = th.querySelector(".arrow");
+    if (th.getAttribute("data-sort") === sortKey) {
+      arrow.textContent = sortDir === 1 ? "▲" : "▼";
+    } else {
+      arrow.textContent = "";
+    }
+  });
+}
+
+function renderAll() {
+  renderProjectSelects();
+  renderCards();
+  renderChart();
+  renderTable();
+  updateLastSavedLabel();
+}
+
+// ---------- Actions ----------
+function addTransaction() {
+  var date = document.getElementById("addDate").value || todayStr();
+  var project = document.getElementById("addProject").value;
+  var category = document.getElementById("addCategory").value;
+  var subcategory = document.getElementById("addSubcategory").value.trim();
+  var description = document.getElementById("addDescription").value.trim();
+  var amount = parseFloat(document.getElementById("addAmount").value);
+  var recurring = document.getElementById("addRecurring").checked;
+
+  if (project === "__new__") {
+    handleNewProject(document.getElementById("addProject"));
+    project = document.getElementById("addProject").value;
+    if (project === "__new__") return;
+  }
+  if (!description) { alert("Please enter a description."); return; }
+  if (isNaN(amount) || amount < 0) { alert("Please enter a valid amount (0 or more)."); return; }
+
+  state.transactions.push({
+    id: nextId(),
+    date: date,
+    project: project,
+    category: category,
+    subcategory: subcategory,
+    description: description,
+    amount: Math.round(amount * 100) / 100,
+    recurring: recurring,
+    note: ""
+  });
+  saveState();
+  // Reset entry fields (keep date & project for fast batch entry)
+  document.getElementById("addSubcategory").value = "";
+  document.getElementById("addDescription").value = "";
+  document.getElementById("addAmount").value = "";
+  document.getElementById("addRecurring").checked = false;
+  renderAll();
+}
+
+function handleNewProject(selectEl) {
+  var name = prompt("New project / endeavor name:");
+  if (name) {
+    name = name.trim();
+    if (name && state.projects.indexOf(name) === -1) {
+      state.projects.push(name);
+      saveState();
+      renderProjectSelects();
+    }
+    if (name) selectEl.value = name;
+  } else {
+    selectEl.value = state.projects[0] || "";
+  }
+}
+
+function saveEdit(id) {
+  var row = document.querySelector('tr.editing[data-id="' + id + '"]');
+  if (!row) return;
+  var t = findTx(id);
+  if (!t) return;
+  var amount = parseFloat(row.querySelector(".e-amount").value);
+  if (isNaN(amount) || amount < 0) { alert("Please enter a valid amount (0 or more)."); return; }
+  t.date = row.querySelector(".e-date").value || t.date;
+  t.project = row.querySelector(".e-project").value;
+  t.category = row.querySelector(".e-category").value;
+  t.subcategory = row.querySelector(".e-subcategory").value.trim();
+  t.description = row.querySelector(".e-description").value.trim();
+  t.note = row.querySelector(".e-note").value.trim();
+  t.recurring = row.querySelector(".e-recurring").checked;
+  t.amount = Math.round(amount * 100) / 100;
+  editingId = null;
+  saveState();
+  renderAll();
+}
+
+function deleteTransaction(id) {
+  var t = findTx(id);
+  if (!t) return;
+  if (!confirm('Delete "' + t.description + '" (' + money(t.amount) + ")?")) return;
+  state.transactions = state.transactions.filter(function (x) { return x.id !== id; });
+  if (editingId === id) editingId = null;
+  saveState();
+  renderAll();
+}
+
+// ---------- Export / Import ----------
+function downloadFile(filename, content, mime) {
+  var blob = new Blob([content], { type: mime });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+}
+
+function exportJson() {
+  downloadFile("finance-data.json", JSON.stringify(state, null, 2), "application/json");
+}
+
+function csvField(v) {
+  var s = String(v == null ? "" : v);
+  if (/[",\n\r]/.test(s)) s = '"' + s.replace(/"/g, '""') + '"';
+  return s;
+}
+
+function exportCsv() {
+  var rows = [["date", "project", "category", "subcategory", "description", "amount", "recurring_monthly", "note"]];
+  state.transactions.forEach(function (t) {
+    rows.push([t.date, t.project, t.category, t.subcategory, t.description,
+      (Number(t.amount) || 0).toFixed(2), t.recurring ? "TRUE" : "FALSE", t.note || ""]);
+  });
+  var csv = rows.map(function (r) { return r.map(csvField).join(","); }).join("\r\n");
+  downloadFile("finance-data.csv", csv, "text/csv");
+}
+
+function importJson(file) {
+  var reader = new FileReader();
+  reader.onload = function () {
+    try {
+      var parsed = JSON.parse(reader.result);
+      if (!parsed || !Array.isArray(parsed.transactions) || !Array.isArray(parsed.projects)) {
+        alert("That file doesn't look like a Finance Tracker export (needs 'projects' and 'transactions').");
+        return;
+      }
+      if (!confirm("Replace ALL current data with the imported file? (" + parsed.transactions.length + " transactions)")) return;
+      state = parsed;
+      editingId = null;
+      saveState();
+      renderAll();
+    } catch (e) {
+      alert("Could not read that file as JSON: " + e.message);
+    }
+  };
+  reader.readAsText(file);
+}
+
+// ---------- Event wiring ----------
+document.getElementById("btnAdd").addEventListener("click", addTransaction);
+document.getElementById("addDescription").addEventListener("keydown", function (e) { if (e.key === "Enter") addTransaction(); });
+document.getElementById("addAmount").addEventListener("keydown", function (e) { if (e.key === "Enter") addTransaction(); });
+document.getElementById("addProject").addEventListener("change", function () {
+  if (this.value === "__new__") handleNewProject(this);
+});
+
+document.getElementById("btnExportJson").addEventListener("click", exportJson);
+document.getElementById("btnExportCsv").addEventListener("click", exportCsv);
+document.getElementById("btnImportJson").addEventListener("click", function () {
+  document.getElementById("importFile").click();
+});
+document.getElementById("importFile").addEventListener("change", function () {
+  if (this.files && this.files[0]) importJson(this.files[0]);
+  this.value = "";
+});
+
+document.getElementById("filterProject").addEventListener("change", renderTable);
+document.getElementById("filterCategory").addEventListener("change", renderTable);
+document.getElementById("filterSearch").addEventListener("input", renderTable);
+document.getElementById("btnClearFilters").addEventListener("click", function () {
+  document.getElementById("filterProject").value = "";
+  document.getElementById("filterCategory").value = "";
+  document.getElementById("filterSearch").value = "";
+  renderTable();
+});
+
+document.querySelectorAll("th[data-sort]").forEach(function (th) {
+  th.addEventListener("click", function () {
+    var key = th.getAttribute("data-sort");
+    if (sortKey === key) sortDir = -sortDir;
+    else { sortKey = key; sortDir = key === "date" ? -1 : 1; }
+    renderTable();
+  });
+});
+
+// Delegated table actions (edit / delete / save / cancel)
+document.getElementById("txBody").addEventListener("click", function (e) {
+  var btn = e.target.closest("button[data-action]");
+  if (!btn) return;
+  var id = parseInt(btn.getAttribute("data-id"), 10);
+  var action = btn.getAttribute("data-action");
+  if (action === "edit") { editingId = id; renderTable(); }
+  else if (action === "cancel") { editingId = null; renderTable(); }
+  else if (action === "save") { saveEdit(id); }
+  else if (action === "delete") { deleteTransaction(id); }
+});
+
+// ---------- Init ----------
+state = loadState();
+document.getElementById("addDate").value = todayStr();
+renderAll();
+</script>
+</body>
+</html>

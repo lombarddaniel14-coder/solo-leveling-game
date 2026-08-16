@@ -1,0 +1,81 @@
+THE SYSTEM — a Solo Leveling style life tracker
+================================================
+
+Turn your real life into an RPG. Finish quests, earn XP and gold,
+level up, climb the Hunter ranks, and spend your gold on rewards
+you actually want.
+
+
+GETTING STARTED
+---------------
+1. Keep both files in the same folder.
+2. Double-click "Launch THE SYSTEM.bat"  (or just open "THE SYSTEM.html").
+3. A setup wizard runs the first time. It takes about two minutes:
+     - your name and a motto
+     - your six stats (pick presets or invent your own)
+     - your daily quests
+     - what goes in your reward shop
+4. That's it. Start ticking things off.
+
+No install. No account. No internet needed. It's one HTML file.
+
+
+HOW IT WORKS
+------------
+DAILY QUESTS   Your everyday habits. Tick them for XP, stat points and gold.
+               Starred ones (the star icon) are KEYSTONES — clear all of them
+               each day or you fall into the Penalty Zone: lose XP, break your
+               streak, and get the "Fatigued" debuff until you recover.
+
+WEEKLY QUESTS  Bigger goals with a counter. Two extra "◆ THIS WEEK" focus
+               quests rotate in automatically every Monday so it stays fresh.
+
+MAIN QUESTS    Your long-term life goals, plus any personal objectives you add.
+
+GATES          Turn a big scary project into a boss with an HP bar. Log effort
+               to deal damage. Clear it for a big payout.
+
+SHOP           Gold you earn buys the rewards you set up. Click any item to
+               look it up online; hit the little flip button on its icon to see
+               what it actually looks like.
+
+SKILLS         Passive buffs unlock automatically as your stats grow. Active
+               skills (double XP, triple gold, etc.) unlock by level and can be
+               used once a week.
+
+TITLES         Earned from feats. Equip one for a permanent buff.
+
+SECRET QUESTS  Rare hidden trials that appear on their own after you complete
+               something. Accept one and you're on the clock — clear it for a
+               huge reward and an exclusive title, or fail it and take the hit.
+               These are meant to be rare. Let them find you.
+
+FREEZE         Going on holiday? Hit "❄ FREEZE". Nothing counts against you,
+               your streak is held, and those days vanish from your stats.
+               Hit "▶ RESUME" when you're back.
+
+
+CHANGING THINGS LATER
+---------------------
+Hit "⚙ CUSTOMIZE" at the top right any time. You can rename your stats,
+rewrite your daily quests, and add or remove shop rewards. Your level, gold,
+streak and history are never touched.
+
+You can also add/delete quests, goals and shop items directly in the app.
+
+
+IMPORTANT — YOUR SAVE
+---------------------
+Your progress is stored in your browser, on this computer only.
+
+  * Always open it the same way (the .bat, or always double-clicking the
+    HTML). Opening it a different way can look like a blank save — your
+    data isn't gone, the browser just files it separately.
+  * Clearing your browsing data can erase it.
+  * Use "⇩ EXPORT SAVE" now and then to download a backup file, and
+    "⇧ IMPORT SAVE" to restore it (or to move to a new computer).
+
+Nothing is uploaded anywhere. It's all yours, on your machine.
+
+
+Now go level up.
