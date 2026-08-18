@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "THE SYSTEM - Solo Leveling life tracker (desktop)",
   "main": "main.js",
-  "author": "Daniel Lombard",
   "license": "UNLICENSED",
   "scripts": {
     "start": "electron .",

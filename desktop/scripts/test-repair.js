@@ -1,13 +1,14 @@
 'use strict';
-// Standalone test: runs the repair routine against Daniel's real exported save
+// Standalone test: runs the repair routine against the user's real exported save
 // (read-only) with a mocked "today" of 2026-07-30 and asserts the exact outcome.
 
 const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
+const os = require('os');
 const { repair } = require(path.join(__dirname, '..', 'repair.js'));
 
-const FIXTURE = 'C:\\Users\\Daniel\\Downloads\\solo-leveling-save-2026-07-25.json';
+const FIXTURE = process.env.REPAIR_FIXTURE || path.join(os.homedir(), 'Downloads', 'solo-leveling-save.json');
 const TODAY = '2026-07-30';
 
 const original = JSON.parse(fs.readFileSync(FIXTURE, 'utf8'));

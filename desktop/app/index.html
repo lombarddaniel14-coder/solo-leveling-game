@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>THE SYSTEM // Daniel</title>
+<title>THE SYSTEM // the user</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
@@ -1121,7 +1121,7 @@
     <div class="avatar-circle" id="avatarCircle">D</div>
     <div class="profile-info">
       <div class="player-name-row">
-        <input id="playerName" type="text" maxlength="20" spellcheck="false" value="Daniel">
+        <input id="playerName" type="text" maxlength="20" spellcheck="false" value="the user">
         <span class="level-badge" id="levelBadge">LV. 1</span>
         <span class="rank-badge rank-E" id="rankBadge">E-RANK</span>
         <span class="gold-badge" id="goldBadge"><span class="gold-coin"></span><span id="goldAmount">0</span> G</span>
@@ -1599,7 +1599,7 @@
     /* -- fitness wave 2 -- */
     { id:'gymreapers_belt',cat:'FITNESS',   name:'Gymreapers 10MM Lever Belt',      usd:90,   desc:'Brace against leather so your spine stays stacked under three plates.' },
     { id:'sbd_elbow_sleeves',cat:'FITNESS', name:'SBD Elbow Sleeves',               usd:80,   desc:'Keep your elbows warm and honest through every heavy bench single.' },
-    { id:'slingshot_bench',cat:'FITNESS',   name:'Sling Shot by Mark Bell',         usd:65,   desc:'Overload past 315 in training so 315 feels like a warmup.' },
+    { id:'slingshot_bench',cat:'FITNESS',   name:'Sling Shot by Mark Bell',         usd:65,   desc:'Overload in training so your top set feels like a warmup.' },
     { id:'gold_standard_whey',cat:'FITNESS',name:'ON Gold Standard Whey, 5 lb',     usd:75,   desc:"You can't build 200 lean pounds out of willpower alone." },
     { id:'theragun_mini',  cat:'FITNESS',   name:'Theragun Mini (2nd Gen)',         usd:200,  desc:'Beat the soreness out tonight so you can train again tomorrow.' },
     { id:'chalk_wraps',    cat:'FITNESS',   name:'Liquid Chalk + Wrist Wraps',      usd:35,   desc:'Small gear, big singles.' },
@@ -1623,7 +1623,7 @@
     { id:'lg_4k_monitor',  cat:'TECH',      name:'LG 27" UltraFine 4K Monitor',     usd:400,  desc:'27 inches of 4K so your business stops living in cramped windows.' },
     { id:'mx_master_3s',   cat:'TECH',      name:'Logitech MX Master 3S',           usd:100,  desc:'Eight-hour desk days deserve better than a $12 mouse.' },
     { id:'titan_evo_chair',cat:'TECH',      name:'Secretlab Titan Evo',             usd:550,  desc:'Your back builds this business too — stop punishing it.' },
-    { id:'dorm_fridge',    cat:'TECH',      name:'Bentley Dorm Mini Fridge',        usd:100,  desc:'Waltham move-in upgrade — protein within arm\'s reach.' },
+    { id:'dorm_fridge',    cat:'TECH',      name:'Dorm Mini Fridge',                usd:100,  desc:'Move-in upgrade — protein within arm\'s reach.' },
     /* -- mind (vault-sourced reading list) -- */
     { id:'book_bundle',    cat:'MIND',      name:'Starred To-Read 5-Book Bundle',   usd:80,   desc:"Can't Hurt Me to Starting Strength — your own list, finally bought." },
     { id:'atomic_habits',  cat:'MIND',      name:'Atomic Habits — James Clear',     usd:18,   desc:"The manual for the system you're already living." },
@@ -1640,7 +1640,7 @@
     { id:'k1_race_night',  cat:'EXPERIENCE',name:'K1 Speed Race Night (3 Races)',   usd:80,   desc:"Race real karts to remember why you're coding a racing game." },
     { id:'supercar_track_pkg',cat:'EXPERIENCE',name:'3-Supercar Track Package',     usd:800,  desc:'Stop building supercars in brick — drive three of them flat out.' },
     { id:'national_pass',  cat:'EXPERIENCE',name:'The National Card Show Day Pass', usd:75,   desc:'Rosemont, July 29–Aug 2. Walk the floor with a budget and a plan.' },
-    { id:'meet_entry',     cat:'EXPERIENCE',name:'First Powerlifting Meet Entry',   usd:85,   desc:'Put the 315 on a sanctioned platform. Chalk up. Get judged.' },
+    { id:'meet_entry',     cat:'EXPERIENCE',name:'First Powerlifting Meet Entry',   usd:85,   desc:'Put your top set on a sanctioned platform. Chalk up. Get judged.' },
     { id:'index_deposit',  cat:'EXPERIENCE',name:'Investment Unlock: $50 to Index Fund', usd:50, desc:'Turn reward budget into the portfolio. Future you says thanks.' }
   ];
 
@@ -1814,7 +1814,7 @@
   function defaultState(){
     return {
       player: {
-        name: 'Daniel',
+        name: 'the user',
         level: 1,
         xp: 0,
         xpToNext: 100,
@@ -2381,7 +2381,7 @@
 
   /* ---------------- Weekly quests ---------------- */
   /* Rotating weekly "focus" quests — 2 change each week, drawn from a pool tied to
-     Daniel's active projects. Deterministic per week so they're stable within a week
+     the user's active projects. Deterministic per week so they're stable within a week
      and survive reloads. tickXp/tickStat awarded per +1; completion* on finishing. */
   var WEEKLY_ROTATION = [
     { key:'cold_calls',   text:'Call 3 firms on your Chicago AI-audit list',       stat:'wealth',    target:3, tickXp:12, tickStat:1, completionXp:55, completionStat:5 },
@@ -3946,7 +3946,7 @@
   });
 
   document.getElementById('playerName').addEventListener('change', function(e){
-    var val = e.target.value.trim() || 'Daniel';
+    var val = e.target.value.trim() || 'the user';
     state.player.name = val;
     save(); renderProfile();
   });
@@ -4044,7 +4044,7 @@
     ACHIEVEMENTS.forEach(function(a){ if(state.unlockedAchievements.indexOf(a.id) === -1 && a.cond(state)) state.unlockedAchievements.push(a.id); });
   }
 
-  /* One-time seed (requested 2026-07-16): freeze the System for Daniel's trip,
+  /* One-time seed (requested 2026-07-16): freeze the System for the user's trip,
      starting that day. Runs BEFORE the first rollover so no penalty can fire
      first, even if the app isn't opened again until after the trip. Click
      ▶ RESUME once when back — the seed never re-freezes. */
